@@ -1,11 +1,8 @@
 import streamlit as st
 import pickle
 from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
 import pandas as pd
-
-# Carregar modelo
-with open('models/LogisticRegression.pkl', 'rb') as f:
-    lr = pickle.load(f)
 
 st.title('Predição de Qualidade de Vinhos')
 
@@ -30,22 +27,22 @@ df = pd.read_csv(path)
 X = df.drop(['qualidade', 'qualidade_bin', 'Id'], axis=1)
 y = df['qualidade_bin']
 
-st.write(X.columns)
-
 # Padronizar as colunas de entrada
 scaler = StandardScaler()
 X = scaler.fit_transform(X)
 
-print(lr)
+# Treinar o modelo Logistic Regression
+lr = LogisticRegression(random_state=0)
+lr.fit(X, y)
 
 # Realizar a predição
-prediction = lr.predict(scaler.fit_transform([[fixed_acidity, volatile_acidity, citric_acid, residual_sugar, 
+prediction = lr.predict(scaler.transform([[fixed_acidity, volatile_acidity, citric_acid, residual_sugar, 
                                             chlorides, free_sulfur_dioxide, total_sulfur_dioxide, density, pH, 
                                             sulphates, alcohol]]))
 
 # Exibir o resultado da predição
 st.subheader('Resultado da Predição')
-if prediction[0] == 'inferior':
+if prediction[0] == 0:
     st.error('A qualidade do vinho é inferior.')
 else:
     st.success('A qualidade do vinho é superior.')
